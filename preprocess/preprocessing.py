@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler, OneHotEncoder
+from imblearn.over_sampling import SMOTE
 
 
 def load_data(file_path):
@@ -103,26 +104,33 @@ def preprocess_data(file_path, target_col, apply_smote_option=False, apply_scali
     """
     # Carregar o dataset
     df = load_data(file_path)
+    print("Dataset carregado!!!")
 
     # Descartar colunas correlacionadas
     columns_to_drop = ['relationship', 'education']
     df = drop_correlated_columns(df, columns_to_drop)
+    print("COlunas correlacionadas deletadas!!!")
 
     # Codificar variáveis categóricas
     df_encoded = encode_categorical_columns(df)
+    print("Variaveis categoricas codificadas!!!")
 
     # Separar datasets para o modelo alvo e shadow
     target_dataset, shadow_dataset = split_dataset(df_encoded, target_col)
+    print("Separando dados do modelo alvo e shadow!!!")
 
     # Preparar os dados para treinamento e teste do modelo alvo
     X_train, X_test, y_train, y_test = prepare_training_data(target_dataset, target_col)
+    print("Dados de treinamento preparados!!!")
 
     # Aplicar SMOTE se selecionado
     if apply_smote_option:
         X_train, y_train = apply_smote(X_train, y_train)
+        print("Smote aplicado!!!")
 
     # Aplicar MinMaxScaler se selecionado
     if apply_scaling_option:
         X_train, X_test = apply_minmax_scaling(X_train, X_test)
+        print("MInMax aplicado!!!")
 
     return X_train, X_test, y_train, y_test, shadow_dataset

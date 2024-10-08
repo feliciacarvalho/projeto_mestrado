@@ -1,10 +1,10 @@
 from preprocess.preprocessing import preprocess_data
+from models.target_model import train_target_model
+from models.shadow_model import train_shadow_models
 
 if __name__ == "__main__":
-    # Caminho para o arquivo CSV de dados
-    data_path = "data/adult_clean.csv"
     
-    # Coluna alvo
+    data_path = "data/adult_clean.csv"
     target_column = "income"
 
     # Executa o pré-processamento
@@ -15,6 +15,20 @@ if __name__ == "__main__":
         apply_scaling_option=True  # Defina True para aplicar MinMaxScaler
     )
     
-    
     print(f"Conjunto de treino: {X_train.shape}, Conjunto de teste: {X_test.shape}")
     print(f"Conjunto Shadow: {shadow_dataset.shape}")
+
+    # Treinando o modelo alvo
+    print("Treinando o modelo alvo...")
+    target_model, target_history = train_target_model(X_train, y_train, X_test, y_test, epochs=20, batch_size=32)
+
+    # Treinando os modelos shadow
+    print("Treinando os modelos shadow...")
+    shadow_models = train_shadow_models(shadow_dataset, target_column, num_models=5, epochs=20, batch_size=32)
+
+    # Salvando os modelos treinados
+    target_model.save("results/output/target_model.h5")
+    for idx, model in enumerate(shadow_models):
+        model.save(f"results/output/shadow_model_{idx}.h5")
+
+    print("Modelos treinados e salvos com sucesso!")

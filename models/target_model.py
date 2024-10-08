@@ -1,21 +1,36 @@
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Conv1D, MaxPooling1D, Flatten, Dense, Dropout
+import numpy as np
+from tensorflow.keras.callbacks import Callback
+from models.cnn_model import build_cnn_1d_model
 
+# Callback para mostrar progresso durante o treinamento
+class PrintDot(Callback):
+    def on_epoch_end(self, epoch, logs=None):
+        if epoch % 10 == 0: print('')
+        print('.', end='')
 
-def build_cnn_1d(input_shape):
-    model = Sequential()
+# Função para treinar o modelo alvo
+def train_target_model(X_train, y_train, X_test, y_test, epochs=20, batch_size=32):
+    """
+    Treina o modelo alvo usando CNN 1D.
     
-    # Camada convolucional 1D
-    model.add(Conv1D(filters=64, kernel_size=3, activation='relu', input_shape=input_shape))
-    model.add(MaxPooling1D(pool_size=2))
-    
-    model.add(Conv1D(filters=128, kernel_size=3, activation='relu'))
-    model.add(MaxPooling1D(pool_size=2))
-    
-    model.add(Flatten())
-    model.add(Dense(64, activation='relu'))
-    model.add(Dropout(0.5))  # Adiciona regularização
-    model.add(Dense(1, activation='sigmoid'))  # Saída binária
-    
-    model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
-    return model
+    :param X_train: Dados de treino
+    :param y_train: Labels de treino
+    :param X_test: Dados de teste
+    :param y_test: Labels de teste
+    :param epochs: Número de épocas
+    :param batch_size: Tamanho do batch
+    :return: O modelo treinado e o histórico do treinamento
+    """
+    # Expandir a dimensão do input para se adequar à CNN 1D
+    X_train = np.expand_dims(X_train, axis=2)
+    X_test = np.expand_dims(X_test, axis=2)
+
+    input_shape = (X_train.shape[1], 1)
+    model = build_cnn_1d_model(input_shape)
+
+    # Treinando o modelo
+    history = model.fit(X_train, y_train, epochs=epochs, batch_size=batch_size,
+                        validation_data=(X_test, y_test), callbacks=[PrintDot()], verbose=0)
+
+    print("\nTreinamento do modelo alvo concluído!")
+    return model, history
