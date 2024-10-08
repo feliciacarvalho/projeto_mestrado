@@ -11,8 +11,8 @@ if __name__ == "__main__":
     X_train, X_test, y_train, y_test, shadow_dataset = preprocess_data(
         file_path=data_path, 
         target_col=target_column,
-        apply_smote_option=True,   # Defina True para aplicar SMOTE
-        apply_scaling_option=True  # Defina True para aplicar MinMaxScaler
+        apply_smote_option=True,   # Defina True ou False para aplicar ou não SMOTE
+        apply_scaling_option=True  # Defina True ou False para aplicar ou não MinMaxScaler
     )
     
     print(f"Conjunto de treino: {X_train.shape}, Conjunto de teste: {X_test.shape}")

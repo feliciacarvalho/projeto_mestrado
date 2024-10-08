@@ -33,7 +33,7 @@ def build_cnn_1d_model(input_shape):
     return model
 
 def plot_training_history(history):
-    """Plotar o histórico de perda e acurácia."""
+    """Plota o histórico de perda e acurácia."""
     plt.figure(figsize=(12, 5))
 
     # Plotar perda de treinamento e validação

@@ -103,7 +103,7 @@ def preprocess_data(file_path, target_col, apply_smote_option=False, apply_scali
     5. Divisão em treino/teste
     6. Opcional: Aplicação de SMOTE e MinMaxScaler
     """
-    # Carregar o dataset
+    
     df = load_data(file_path)
     print("Dataset carregado!!!")
 
@@ -129,7 +129,7 @@ def preprocess_data(file_path, target_col, apply_smote_option=False, apply_scali
         X_train, y_train = apply_smote(X_train, y_train)
         print("Smote aplicado!!!")
 
-    # Aplicar MinMaxScaler se selecionado
+    # Aplicar MinMax se selecionado
     if apply_scaling_option:
         X_train, X_test = apply_minmax_scaling(X_train, X_test)
         print("MInMax aplicado!!!")
