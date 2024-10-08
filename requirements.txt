@@ -1,6 +1,7 @@
 numpy
 pandas
 seaborn
+imblearn
 matplotlib
 tensorflow
 scikit-learn
