@@ -1,14 +1,6 @@
 import numpy as np
-from tensorflow.keras.callbacks import Callback
-from models.cnn_model import build_cnn_1d_model
+from models.cnn_model import build_cnn_1d_model, PrintDot, plot_training_history, evaluate_model
 
-# Callback para mostrar progresso durante o treinamento
-class PrintDot(Callback):
-    def on_epoch_end(self, epoch, logs=None):
-        if epoch % 10 == 0: print('')
-        print('.', end='')
-
-# Função para treinar o modelo alvo
 def train_target_model(X_train, y_train, X_test, y_test, epochs=20, batch_size=32):
     """
     Treina o modelo alvo usando CNN 1D.
@@ -33,4 +25,7 @@ def train_target_model(X_train, y_train, X_test, y_test, epochs=20, batch_size=3
                         validation_data=(X_test, y_test), callbacks=[PrintDot()], verbose=0)
 
     print("\nTreinamento do modelo alvo concluído!")
+    plot_training_history(history)
+    evaluate_model(model, X_test, y_test)
+
     return model, history

@@ -5,6 +5,7 @@ from sklearn.preprocessing import MinMaxScaler, OneHotEncoder
 from imblearn.over_sampling import SMOTE
 
 
+
 def load_data(file_path):
 
     """

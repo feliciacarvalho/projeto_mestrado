@@ -4,7 +4,7 @@ from models.shadow_model import train_shadow_models
 
 if __name__ == "__main__":
     
-    data_path = "data/adult_clean.csv"
+    data_path = "data/adult_clean .csv"
     target_column = "income"
 
     # Executa o pré-processamento
@@ -24,7 +24,7 @@ if __name__ == "__main__":
 
     # Treinando os modelos shadow
     print("Treinando os modelos shadow...")
-    shadow_models = train_shadow_models(shadow_dataset, target_column, num_models=5, epochs=20, batch_size=32)
+    shadow_models, shadow_history = train_shadow_models(shadow_dataset, target_column, num_models=5, epochs=20, batch_size=32)
 
     # Salvando os modelos treinados
     target_model.save("results/output/target_model.h5")

@@ -2,7 +2,6 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from models.cnn_model import build_cnn_1d_model
 
-# Função para treinar os modelos shadow
 def train_shadow_models(shadow_dataset, target_col, num_models=5, epochs=20, batch_size=32):
     """
     Treina múltiplos modelos shadow usando CNN 1D.
@@ -35,10 +34,10 @@ def train_shadow_models(shadow_dataset, target_col, num_models=5, epochs=20, bat
         model = build_cnn_1d_model(input_shape)
 
         # Treinando o modelo
-        model.fit(X_train, y_train, epochs=epochs, batch_size=batch_size, 
-                  validation_data=(X_test, y_test), verbose=0)
+        history = model.fit(X_train, y_train, epochs=epochs, batch_size=batch_size, 
+                            validation_data=(X_test, y_test), verbose=0)
 
         shadow_models.append(model)
         print(f"Modelo shadow {i+1}/{num_models} treinado.")
 
-    return shadow_models
+    return shadow_models, history
