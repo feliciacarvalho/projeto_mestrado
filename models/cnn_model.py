@@ -26,7 +26,7 @@ def build_cnn_1d_model(input_shape):
         MaxPooling1D(pool_size=2),
         Flatten(),
         Dense(64, activation='relu'),
-        Dense(1, activation='sigmoid')  # Saída binária
+        Dense(1, activation='sigmoid') 
     ])
 
     model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
