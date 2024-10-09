@@ -8,14 +8,14 @@ if __name__ == "__main__":
     target_column = "income"
 
     # Executa o pré-processamento
-    X_train, X_val, X_test, y_train, y_val, y_test, shadow_dataset= preprocess_data(
+    X_train, X_val, X_test, y_train, y_val, y_test, shadow_dataset = preprocess_data(
         file_path=data_path, 
         target_col=target_column,
         apply_smote_option=True,   # Defina True ou False para aplicar ou não SMOTE
         apply_scaling_option=True  # Defina True ou False para aplicar ou não MinMaxScaler
     )
     
-    print(f"Conjunto de treino: {X_train.shape}, Conjunto de teste: {X_test.shape}")
+    print(f"Conjunto de treino: {X_train.shape}, Conjunto de validação: {X_val.shape}, Conjunto de teste: {X_test.shape}")
     print(f"Conjunto Shadow: {shadow_dataset.shape}")
 
     # Treinando o modelo alvo

@@ -4,6 +4,7 @@ from tensorflow.keras.layers import Dense, Conv1D, MaxPooling1D, Flatten
 from tensorflow.keras.callbacks import Callback
 import matplotlib.pyplot as plt
 from sklearn.metrics import classification_report, roc_curve, auc
+import os
 
 class PrintDot(Callback):
     """Callback para mostrar progresso durante o treinamento."""
@@ -13,12 +14,6 @@ class PrintDot(Callback):
         print('.', end='')
 
 def build_cnn_1d_model(input_shape):
-    """
-    Constrói uma CNN 1D para classificação binária.
-    
-    :param input_shape: Tuple que representa a forma do input para o modelo
-    :return: Um modelo Keras Sequential
-    """
     model = Sequential([
         Conv1D(64, kernel_size=2, activation='relu', input_shape=input_shape),
         MaxPooling1D(pool_size=2),
@@ -32,8 +27,8 @@ def build_cnn_1d_model(input_shape):
     model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
     return model
 
-def plot_training_history(history):
-    """Plota o histórico de perda e acurácia."""
+def plot_training_history(history, model_name):
+    """Plota e salva o histórico de perda e acurácia."""
     plt.figure(figsize=(12, 5))
 
     # Plotar perda de treinamento e validação
@@ -45,7 +40,7 @@ def plot_training_history(history):
     plt.legend()
     plt.ylim(0, 1)
 
-    # Plotar acurácia (accuracy) de treinamento e validação
+    # Plotar acurácia de treinamento e validação
     plt.subplot(1, 2, 2)
     plt.plot(history.history['accuracy'], label='Acurácia de Treinamento')
     plt.plot(history.history['val_accuracy'], label='Acurácia de Validação')
@@ -55,9 +50,10 @@ def plot_training_history(history):
     plt.ylim(0, 1)
 
     plt.tight_layout()
-    plt.show()
+    plt.savefig(f'results/metrics/{model_name}_training_history.png') 
+    plt.close()  
 
-def evaluate_model(model, X_test, y_test):
+def evaluate_model(model, X_test, y_test, model_name):
     """Avaliar o modelo e gerar métricas."""
     y_pred_proba = model.predict(X_test)
     y_pred = np.round(y_pred_proba).flatten()
@@ -78,5 +74,5 @@ def evaluate_model(model, X_test, y_test):
     plt.title('Curva ROC')
     plt.legend(loc='lower right')
     plt.grid(True)
-    plt.show()
-
+    plt.savefig(f'results/metrics/{model_name}_roc_curve.png')
+    plt.close() 
