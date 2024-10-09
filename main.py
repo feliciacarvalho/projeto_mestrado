@@ -8,7 +8,7 @@ if __name__ == "__main__":
     target_column = "income"
 
     # Executa o pré-processamento
-    X_train, X_test, y_train, y_test, shadow_dataset = preprocess_data(
+    X_train, X_val, X_test, y_train, y_val, y_test, shadow_dataset= preprocess_data(
         file_path=data_path, 
         target_col=target_column,
         apply_smote_option=True,   # Defina True ou False para aplicar ou não SMOTE
@@ -20,7 +20,7 @@ if __name__ == "__main__":
 
     # Treinando o modelo alvo
     print("Treinando o modelo alvo...")
-    target_model, target_history = train_target_model(X_train, y_train, X_test, y_test, epochs=20, batch_size=32)
+    target_model, target_history = train_target_model(X_train, y_train, X_val, y_val, X_test, y_test, epochs=20, batch_size=32)
 
     # Treinando os modelos shadow
     print("Treinando os modelos shadow...")

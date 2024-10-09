@@ -53,7 +53,7 @@ def split_dataset(df, target_col, sample_size=10000):
 
 ### --------------------------------------------------------------------------------------------
 
-def prepare_training_data(dataset, target_col, test_size=0.25, random_state=1):
+def prepare_training_data(dataset, target_col, test_size=0.20, random_state=1):
     """
     Separa as variáveis preditoras e a variável alvo e divide os dados em treino e teste.
     Retorna arrays numpy ao invés de DataFrames pandas.
@@ -63,10 +63,13 @@ def prepare_training_data(dataset, target_col, test_size=0.25, random_state=1):
     y = dataset[target_col].values  # Convertendo para numpy array
 
     # Dividindo em treino e teste usando numpy arrays
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, 
-                                                        random_state=random_state, stratify=y)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20, 
+                                                        random_state=0, stratify=y)
 
-    return X_train, X_test, y_train, y_test
+
+    X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.25, random_state=0)
+
+    return X_train, X_val, X_test, y_train, y_val, y_test
 
 ### --------------------------------------------------------------------------------------------
 
@@ -110,18 +113,18 @@ def preprocess_data(file_path, target_col, apply_smote_option=False, apply_scali
     # Descartar colunas correlacionadas
     columns_to_drop = ['relationship', 'education']
     df = drop_correlated_columns(df, columns_to_drop)
-    print("COlunas correlacionadas deletadas!!!")
+    print("Colunas correlacionadas deletadas!!!")
 
     # Codificar variáveis categóricas
     df_encoded = encode_categorical_columns(df)
-    print("Variaveis categoricas codificadas!!!")
+    print("Variáveis categóricas codificadas!!!")
 
     # Separar datasets para o modelo alvo e shadow
     target_dataset, shadow_dataset = split_dataset(df_encoded, target_col)
     print("Separando dados do modelo alvo e shadow!!!")
 
-    # Preparar os dados para treinamento e teste do modelo alvo
-    X_train, X_test, y_train, y_test = prepare_training_data(target_dataset, target_col)
+    # Preparar os dados para treinamento, validação e teste do modelo alvo
+    X_train, X_val, X_test, y_train, y_val, y_test = prepare_training_data(target_dataset, target_col)
     print("Dados de treinamento preparados!!!")
 
     # Aplicar SMOTE se selecionado
@@ -132,6 +135,6 @@ def preprocess_data(file_path, target_col, apply_smote_option=False, apply_scali
     # Aplicar MinMax se selecionado
     if apply_scaling_option:
         X_train, X_test = apply_minmax_scaling(X_train, X_test)
-        print("MInMax aplicado!!!")
+        print("MinMax aplicado!!!")
 
-    return X_train, X_test, y_train, y_test, shadow_dataset
+    return X_train, X_val, X_test, y_train, y_val, y_test, shadow_dataset
