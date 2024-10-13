@@ -18,7 +18,7 @@ def train_target_model(X_train, y_train, X_val, y_val, X_test, y_test, epochs=20
     X_val = np.expand_dims(X_val, axis=2)
     X_test = np.expand_dims(X_test, axis=2)
 
-    input_shape = (X_train.shape[1], 1)
+    input_shape = (X_train.shape[1],1)
     model = build_cnn_1d_model(input_shape)
 
     # Treinando o modelo
