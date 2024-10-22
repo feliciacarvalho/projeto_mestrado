@@ -44,7 +44,7 @@ def split_dataset(df, target_col):
     O modelo alvo recebe 15.000 amostras e o shadow recebe o restante.
     """
     df.dropna(inplace=True)
-    target_dataset = df.sample(n=30000, replace=False)
+    target_dataset = df.sample(n=15000, replace=False)
     shadow_dataset = df.drop(target_dataset.index)
 
     return target_dataset, shadow_dataset
@@ -61,12 +61,12 @@ def prepare_training_data(dataset, target_col, test_size=0.2, val_size=0.2, rand
     y = dataset[target_col].values  # Convertendo para numpy array
 
     # Dividindo em treino + validação e teste
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, 
+    X_train_val, X_test, y_train_val, y_test = train_test_split(X, y, test_size=test_size, 
                                                                 random_state=random_state, stratify=y)
 
     # Dividindo treino em treino e validação
-    X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=val_size, 
-                                                      random_state=random_state, stratify=y_train)
+    X_train, X_val, y_train, y_val = train_test_split(X_train_val, y_train_val, test_size=val_size, 
+                                                      random_state=random_state, stratify=y_train_val)
 
     return X_train, X_val, X_test, y_train, y_val, y_test
 

@@ -13,26 +13,14 @@ class PrintDot(Callback):
             print('')
         print('.', end='')
 
-# def build_cnn_1d_model(input_shape):
-#     model = Sequential([
-#         Conv1D(64, kernel_size=2, activation='relu', input_shape=input_shape),
-#         MaxPooling1D(pool_size=2),
-#         Conv1D(128, kernel_size=2, activation='relu'),
-#         MaxPooling1D(pool_size=2),
-#         Flatten(),
-#         Dense(1, activation='relu'),
-#         Dense(1, activation='sigmoid') 
-#     ])
-
-    # alteracao para USAR GridSearchCV
-    def build_cnn_1d_model(input_shape=(100, 8), optimizer='adam'):
+def build_cnn_1d_model(input_shape):
     model = Sequential([
         Conv1D(64, kernel_size=2, activation='relu', input_shape=input_shape),
         MaxPooling1D(pool_size=2),
         Conv1D(128, kernel_size=2, activation='relu'),
         MaxPooling1D(pool_size=2),
         Flatten(),
-        Dense(128, activation='relu'),
+        Dense(64, activation='relu'),
         Dense(1, activation='sigmoid') 
     ])
 
