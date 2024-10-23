@@ -44,7 +44,7 @@ def split_dataset(df, target_col):
     O modelo alvo recebe 15.000 amostras e o shadow recebe o restante.
     """
     df.dropna(inplace=True)
-    target_dataset = df.sample(n=15000, replace=False)
+    target_dataset = df.sample(n=30000, replace=False)
     shadow_dataset = df.drop(target_dataset.index)
 
     return target_dataset, shadow_dataset

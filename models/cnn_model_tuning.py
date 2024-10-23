@@ -19,7 +19,7 @@ def build_cnn_1d_model_tuner(hp):
                      activation='relu'))
     model.add(MaxPooling1D(pool_size=hp.Choice('pool_size2', values=[2, 3])))
 
-    # Use GlobalAveragePooling1D para evitar problemas de dimensão
+    # GlobalAveragePooling1D para evitar problemas de dimensão
     model.add(GlobalAveragePooling1D())
     
     model.add(Dense(units=hp.Int('dense_units', min_value=32, max_value=128, step=32), activation='relu'))

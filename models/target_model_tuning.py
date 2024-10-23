@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from models.cnn_model_tuning import run_random_search
 from models.cnn_model import plot_training_history, PrintDot, evaluate_model
 
-# Diretório para salvar os gráficos de métricas
+
 metrics_dir = "results/metrics"
 if not os.path.exists(metrics_dir):
     os.makedirs(metrics_dir)
@@ -22,9 +22,9 @@ def tune_target_model(X_train, y_train, X_val, y_val, X_test, y_test):
     :return: Melhor modelo, histórico de treinamento e melhores parâmetros
     """
     # Expandindo as dimensões para a CNN 1D
-    X_train = np.expand_dims(X_train, axis=2)  # Certifique-se de que esta linha está presente
-    X_val = np.expand_dims(X_val, axis=2)      # Certifique-se de que esta linha está presente
-    X_test = np.expand_dims(X_test, axis=2)    # Considere adicionar isso se ainda não estiver
+    X_train = np.expand_dims(X_train, axis=2)  
+    X_val = np.expand_dims(X_val, axis=2)     
+    X_test = np.expand_dims(X_test, axis=2)    
 
     # Executa a busca de hiperparâmetros
     best_model, best_params = run_random_search(X_train, y_train, X_val, y_val)

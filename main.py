@@ -7,7 +7,7 @@ def main():
     data_path = "data/adult_clean .csv"
     target_column = "income"
 
-    # Executa o pré-processamento2
+    # Executa o pré-processamento
     X_train, X_val, X_test, y_train, y_val, y_test, shadow_dataset = preprocess_data(
         file_path=data_path, 
         target_col=target_column,
@@ -46,7 +46,7 @@ def main():
         else:
             print("Opção inválida. Por favor, selecione uma opção válida.")
 
-    # Salvando os modelos treinados após a seleção
+    # Salvando os pesos dos modelos treinados após a seleção
     target_model.save("results/output/target_model.h5")
     for idx, model in enumerate(shadow_models):
         model.save(f"results/output/shadow_model_{idx}.h5")
