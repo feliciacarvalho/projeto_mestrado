@@ -13,18 +13,45 @@ class PrintDot(Callback):
             print('')
         print('.', end='')
 
-def build_cnn_1d_model(input_shape):
+## Função original
+# def build_cnn_1d_model(input_shape):
+#     model = Sequential([
+#         Conv1D(64, kernel_size=2, activation='relu', input_shape=input_shape),
+#         MaxPooling1D(pool_size=2),
+#         Conv1D(128, kernel_size=2, activation='relu'),
+#         MaxPooling1D(pool_size=2),
+#         Flatten(),
+#         Dense(64, activation='relu'),
+#         Dense(1, activation='sigmoid') 
+#     ])
+
+#     model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+#     return model
+
+
+## Função após adicionar os melhores parametros encontrados com o tunning
+def build_cnn_1d_model(input_shape=(84, 1)): 
+
     model = Sequential([
-        Conv1D(64, kernel_size=2, activation='relu', input_shape=input_shape),
-        MaxPooling1D(pool_size=2),
-        Conv1D(128, kernel_size=2, activation='relu'),
-        MaxPooling1D(pool_size=2),
+        #primeira camada conv
+        Conv1D(64, kernel_size=3, activation='relu', input_shape=input_shape),  # filters=64, kernel_size=3
+        MaxPooling1D(pool_size=2),  
+
+        #segunda camada conv
+        Conv1D(128, kernel_size=3, activation='relu'),  # filters2=128, kernel_size2=3
+        MaxPooling1D(pool_size=3), 
+
         Flatten(),
-        Dense(64, activation='relu'),
+
+        Dense(96, activation='relu'),  # dense_units=96
+
         Dense(1, activation='sigmoid') 
     ])
 
-    model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+    model.compile(optimizer='rmsprop',  
+                    loss='binary_crossentropy',
+                    metrics=['accuracy'])
+
     return model
 
 def plot_training_history(history, model_name):
