@@ -54,14 +54,57 @@ def build_cnn_1d_model(input_shape=(84, 1)):
 
     return model
 
+
+def build_shadow_cnn_1d_model(input_shape):
+    model = Sequential()
+    model.add(Conv1D(32, kernel_size=3, activation='relu', input_shape=input_shape))
+    model.add(MaxPooling1D(pool_size=2))
+    model.add(Flatten())
+    model.add(Dense(64, activation='relu'))
+    model.add(Dense(1, activation='sigmoid'))  # Sigmoid para gerar probabilidades para classificação binária
+    model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])  # Loss para binário
+    return model
+
+
+# def plot_training_history(history, model_name):
+#     """Plota e salva o histórico de perda e acurácia."""
+#     plt.figure(figsize=(12, 5))
+
+#     # Plotar perda de treinamento e validação
+#     plt.subplot(1, 2, 1)
+#     plt.plot(history.history['loss'], label='Loss de Treinamento')
+#     plt.plot(history.history['val_loss'], label='Loss de Validação')
+#     plt.xlabel('Épocas')
+#     plt.ylabel('Loss')
+#     plt.legend()
+#     plt.ylim(0, 1)
+
+#     # Plotar acurácia de treinamento e validação
+#     plt.subplot(1, 2, 2)
+#     plt.plot(history.history['accuracy'], label='Acurácia de Treinamento')
+#     plt.plot(history.history['val_accuracy'], label='Acurácia de Validação')
+#     plt.xlabel('Épocas')
+#     plt.ylabel('Acurácia')
+#     plt.legend()
+#     plt.ylim(0, 1)
+
+#     plt.tight_layout()
+#     plt.savefig(f'results/metrics/{model_name}_training_history.png') 
+#     plt.close()  
+
+
 def plot_training_history(history, model_name):
-    """Plota e salva o histórico de perda e acurácia."""
+    """Plota e salva o histórico de perda e acurácia, verificando a presença de dados de validação."""
     plt.figure(figsize=(12, 5))
 
     # Plotar perda de treinamento e validação
     plt.subplot(1, 2, 1)
     plt.plot(history.history['loss'], label='Loss de Treinamento')
-    plt.plot(history.history['val_loss'], label='Loss de Validação')
+    
+    # Verificar se 'val_loss' existe antes de plotar
+    if 'val_loss' in history.history:
+        plt.plot(history.history['val_loss'], label='Loss de Validação')
+
     plt.xlabel('Épocas')
     plt.ylabel('Loss')
     plt.legend()
@@ -70,19 +113,34 @@ def plot_training_history(history, model_name):
     # Plotar acurácia de treinamento e validação
     plt.subplot(1, 2, 2)
     plt.plot(history.history['accuracy'], label='Acurácia de Treinamento')
-    plt.plot(history.history['val_accuracy'], label='Acurácia de Validação')
+    
+    # Verificar se 'val_accuracy' existe antes de plotar
+    if 'val_accuracy' in history.history:
+        plt.plot(history.history['val_accuracy'], label='Acurácia de Validação')
+
     plt.xlabel('Épocas')
     plt.ylabel('Acurácia')
     plt.legend()
     plt.ylim(0, 1)
 
     plt.tight_layout()
-    plt.savefig(f'results/metrics/{model_name}_training_history.png') 
-    plt.close()  
+    plt.savefig(f'results/metrics/{model_name}_training_history.png')
+    plt.close()
 
 def evaluate_model(model, X_test, y_test, model_name):
     """Avaliar o modelo e gerar métricas."""
+    if X_test.shape[0] == 0:
+        print(f"Erro: Dados de teste vazios para o modelo {model_name}.")
+        return
+
+    # Realizar a predição
     y_pred_proba = model.predict(X_test)
+    
+    # Verificar se as predições não estão vazias
+    if y_pred_proba.shape[0] == 0:
+        print(f"Erro: Predições vazias para o modelo {model_name}.")
+        return
+
     y_pred = np.round(y_pred_proba).flatten()
 
     print("Classification Report:")
@@ -102,4 +160,5 @@ def evaluate_model(model, X_test, y_test, model_name):
     plt.legend(loc='lower right')
     plt.grid(True)
     plt.savefig(f'results/metrics/{model_name}_roc_curve.png')
-    plt.close() 
+    plt.close()
+

@@ -1,34 +1,42 @@
 import numpy as np
-from sklearn.model_selection import train_test_split
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense
+from sklearn.metrics import confusion_matrix, classification_report
 
-def prepare_attack_data(target_data, shadow_data):
+def prepare_attack_data(target_model, shadow_models, target_train_data, target_test_data, shadow_train_data, shadow_test_data):
     """
-    Prepara os dados para o modelo de ataque, dividindo os conjuntos do modelo alvo e shadow.
-    Usa 50% do target_data e 70% do shadow_data para treino e teste do modelo de ataque, 
-    e o restante para validação.
+    Prepara os dados para o modelo de ataque, usando as previsões dos modelos sombra e do modelo alvo.
+    
+    :param target_model: O modelo alvo treinado
+    :param shadow_models: Lista de modelos sombra treinados
+    :param target_train_data: Dados de treino do modelo alvo
+    :param target_test_data: Dados de teste do modelo alvo
+    :param shadow_train_data: Dados de treino dos modelos sombra
+    :param shadow_test_data: Dados de teste dos modelos sombra
+    :return: Dados de treino e validação para o modelo de ataque
     """
     
-    # Seleciona 50% do target_data para treino/teste e o restante para validação
-    num_target_train = int(0.5 * len(target_data))
-    target_train_test = target_data[:num_target_train]
-    target_validation = target_data[num_target_train:]
+    # Gerar as previsões de probabilidade para os dados de treino e teste
+    target_train_preds = target_model.predict(target_train_data)
+    target_test_preds = target_model.predict(target_test_data)
 
-    # Seleciona 70% do shadow_data para treino/teste e o restante para validação
-    num_shadow_train = int(0.5 * len(shadow_data))
-    shadow_train_test = shadow_data[:num_shadow_train]
-    shadow_validation = shadow_data[num_shadow_train:]
-    
-    # Combina os dados de target e shadow para o treino/teste e validação do modelo de ataque
-    attack_train_data = np.vstack([target_train_test, shadow_train_test])
-    attack_val_data = np.vstack([target_validation, shadow_validation])
-    
-    # Divide entre preditores e labels para treino/teste e validação
-    X_train_attack, y_train_attack = attack_train_data[:, :-1], attack_train_data[:, -1]
-    X_val_attack, y_val_attack = attack_val_data[:, :-1], attack_val_data[:, -1]
+    # Gerar as previsões dos modelos sombra para os dados de treino e teste
+    shadow_train_preds = np.array([model.predict(shadow_train_data) for model in shadow_models])
+    shadow_test_preds = np.array([model.predict(shadow_test_data) for model in shadow_models])
 
-    return (X_train_attack, y_train_attack), (X_val_attack, y_val_attack)
+    # As previsões do modelo alvo e dos modelos sombra serão usadas como features
+    # E as labels serão 1 para membros (modelo alvo) e 0 para não-membros (modelos sombra)
+    
+    # Dados para treino
+    attack_train_data = np.concatenate([shadow_train_preds.T, target_train_preds], axis=0)
+    attack_train_labels = np.concatenate([np.zeros(len(shadow_train_preds[0])), np.ones(len(target_train_preds))])
+
+    # Dados para teste
+    attack_test_data = np.concatenate([shadow_test_preds.T, target_test_preds], axis=0)
+    attack_test_labels = np.concatenate([np.zeros(len(shadow_test_preds[0])), np.ones(len(target_test_preds))])
+
+    return (attack_train_data, attack_train_labels), (attack_test_data, attack_test_labels)
+
 
 def define_attack_model(input_dim):
     model = Sequential()
@@ -38,11 +46,27 @@ def define_attack_model(input_dim):
     model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
     return model
 
-def evaluate_attack_model(y_true, y_pred):
-    # Implementar a avaliação do modelo de ataque (pode usar accuracy, precision, recall, etc.)
-    from sklearn.metrics import confusion_matrix, classification_report
 
+def evaluate_attack_model(y_true, y_pred):
     cm = confusion_matrix(y_true, y_pred)
     report = classification_report(y_true, y_pred)
     print("Confusion Matrix:\n", cm)
     print("Classification Report:\n", report)
+
+
+# Função principal
+def train_and_evaluate_attack_model(target_model, shadow_models, target_train_data, target_test_data, shadow_train_data, shadow_test_data):
+    # Preparar os dados para o modelo de ataque
+    (attack_train_data, attack_train_labels), (attack_test_data, attack_test_labels) = prepare_attack_data(
+        target_model, shadow_models, target_train_data, target_test_data, shadow_train_data, shadow_test_data
+    )
+
+    # Definir o modelo de ataque
+    attack_model = define_attack_model(input_dim=attack_train_data.shape[1])
+
+    # Treinamento do modelo de ataque
+    attack_model.fit(attack_train_data, attack_train_labels, epochs=10, batch_size=32, validation_data=(attack_test_data, attack_test_labels))
+
+    # Avaliação do modelo de ataque
+    y_pred_attack = attack_model.predict(attack_test_data)
+    evaluate_attack_model(attack_test_labels, y_pred_attack)

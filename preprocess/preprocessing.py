@@ -38,16 +38,41 @@ def encode_categorical_columns(df):
 
 ### --------------------------------------------------------------------------------------------
 
+# def split_dataset(df, target_col):
+#     """
+#     Separa o dataset em dois: um para o modelo alvo e outro para o shadow.
+#     O modelo alvo recebe 15.000 amostras e o shadow recebe o restante.
+#     """
+#     df.dropna(inplace=True)
+#     target_dataset = df.sample(n=25000, replace=False)
+#     shadow_dataset = df.drop(target_dataset.index)
+
+#     return target_dataset, shadow_dataset
+
+
 def split_dataset(df, target_col):
     """
-    Separa o dataset em dois: um para o modelo alvo e outro para o shadow.
-    O modelo alvo recebe 15.000 amostras e o shadow recebe o restante.
+    Separa o dataset em dois: um para o modelo alvo e outro para o modelo shadow.
+    Agora com a separação correta de dados para o modelo sombra.
     """
     df.dropna(inplace=True)
-    target_dataset = df.sample(n=20000, replace=False)
-    shadow_dataset = df.drop(target_dataset.index)
 
-    return target_dataset, shadow_dataset
+    # 25 mil registros para o modelo alvo (todos os registros)
+    target_dataset = df.sample(n=25000, replace=False)
+    remaining_data = df.drop(target_dataset.index)
+
+    # Separação do conjunto shadow
+    shadow_train_members = target_dataset.sample(n=5000, replace=False)  # 5 mil do conjunto de treino do modelo alvo
+    shadow_train_non_members = remaining_data.sample(n=2000, replace=False)  # 2 mil dos 5 mil restantes
+    shadow_test_non_members = remaining_data.drop(shadow_train_non_members.index)  # 3 mil restantes para teste
+
+    # O conjunto shadow para treino inclui tanto membros quanto não-membros
+    shadow_train_data = pd.concat([shadow_train_members, shadow_train_non_members])
+    shadow_test_data = shadow_test_non_members
+
+    return target_dataset, shadow_train_data, shadow_test_data
+
+
 
 ### --------------------------------------------------------------------------------------------
 
@@ -96,14 +121,58 @@ def apply_minmax_scaling(X_train, X_val, X_test):
 
 ### --------------------------------------------------------------------------------------------
 
+# def preprocess_data(file_path, target_col, apply_smote_option=False, apply_scaling_option=False):
+#     """
+#     Função completa de pré-processamento. Executa:
+#     1. Carregamento dos dados
+#     2. Descartar colunas correlacionadas
+#     3. Codificação de variáveis categóricas
+#     4. Separação dos dados em target e shadow datasets
+#     5. Divisão em treino/validação/teste
+#     6. Opcional: Aplicação de SMOTE e MinMaxScaler
+#     """
+    
+#     df = load_data(file_path)
+#     print("Dataset carregado!!!")
+
+#     # Descartar colunas correlacionadas
+#     columns_to_drop = ['relationship', 'education']
+#     df = drop_correlated_columns(df, columns_to_drop)
+#     print("Colunas correlacionadas deletadas!!!")
+
+#     # Codificar variáveis categóricas
+#     df_encoded = encode_categorical_columns(df)
+#     print("Variáveis categóricas codificadas!!!")
+
+#     # Separar datasets para o modelo alvo e shadow
+#     target_dataset, shadow_dataset = split_dataset(df_encoded, target_col)
+#     print("Separando dados do modelo alvo e shadow!!!")
+
+#     # Preparar os dados para treinamento, validação e teste do modelo alvo
+#     X_train, X_val, X_test, y_train, y_val, y_test = prepare_training_data(target_dataset, target_col)
+#     print("Dados de treinamento preparados!!!")
+
+#     # Aplicar SMOTE se selecionado
+#     if apply_smote_option:
+#         X_train, y_train = apply_smote(X_train, y_train)
+#         print("Smote aplicado!!!")
+
+#     # Aplicar MinMax se selecionado
+#     if apply_scaling_option:
+#         X_train, X_val, X_test = apply_minmax_scaling(X_train, X_val, X_test)
+#         print("MinMax aplicado!!!")
+
+#     return X_train, X_val, X_test, y_train, y_val, y_test, shadow_dataset
+
+
 def preprocess_data(file_path, target_col, apply_smote_option=False, apply_scaling_option=False):
     """
     Função completa de pré-processamento. Executa:
     1. Carregamento dos dados
     2. Descartar colunas correlacionadas
     3. Codificação de variáveis categóricas
-    4. Separação dos dados em target e shadow datasets
-    5. Divisão em treino/validação/teste
+    4. Separação dos dados em target e shadow datasets (membro e não-membro)
+    5. Divisão em treino e teste (não há validação para o modelo shadow)
     6. Opcional: Aplicação de SMOTE e MinMaxScaler
     """
     
@@ -119,11 +188,11 @@ def preprocess_data(file_path, target_col, apply_smote_option=False, apply_scali
     df_encoded = encode_categorical_columns(df)
     print("Variáveis categóricas codificadas!!!")
 
-    # Separar datasets para o modelo alvo e shadow
-    target_dataset, shadow_dataset = split_dataset(df_encoded, target_col)
+    # Separar datasets para o modelo alvo e shadow (membros e não-membros)
+    target_dataset, shadow_train_data, shadow_test_data = split_dataset(df_encoded, target_col)
     print("Separando dados do modelo alvo e shadow!!!")
 
-    # Preparar os dados para treinamento, validação e teste do modelo alvo
+    # Preparar os dados para treinamento e teste do modelo alvo
     X_train, X_val, X_test, y_train, y_val, y_test = prepare_training_data(target_dataset, target_col)
     print("Dados de treinamento preparados!!!")
 
@@ -137,4 +206,7 @@ def preprocess_data(file_path, target_col, apply_smote_option=False, apply_scali
         X_train, X_val, X_test = apply_minmax_scaling(X_train, X_val, X_test)
         print("MinMax aplicado!!!")
 
-    return X_train, X_val, X_test, y_train, y_val, y_test, shadow_dataset
+    # Retornar dados para o modelo alvo e dados para o modelo shadow
+    return X_train, X_val, X_test, y_train, y_val, y_test, shadow_train_data, shadow_test_data
+
+

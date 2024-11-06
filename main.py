@@ -12,7 +12,7 @@ def main():
     target_column = "income"
 
     # Executa o pré-processamento
-    X_train, X_val, X_test, y_train, y_val, y_test, shadow_dataset = preprocess_data(
+    X_train, X_val, X_test, y_train, y_val, y_test, shadow_train_data, shadow_test_data = preprocess_data(
         file_path=data_path,
         target_col=target_column,
         apply_smote_option=True,
@@ -20,7 +20,7 @@ def main():
     )
 
     print(f"Conjunto de treino: {X_train.shape}, Conjunto de validação: {X_val.shape}, Conjunto de teste: {X_test.shape}")
-    print(f"Conjunto Shadow: {shadow_dataset.shape}")
+    print(f"Conjunto Shadow (treinamento): {shadow_train_data.shape}, Conjunto Shadow (teste): {shadow_test_data.shape}")
 
     shadow_models = []
     while True:
@@ -51,17 +51,17 @@ def main():
         elif option == '3':
             print("Treinando os modelos shadow...")
             shadow_models, shadow_history = train_shadow_models(
-                shadow_dataset, target_column, num_models=5, epochs=20, batch_size=32
+                shadow_train_data, target_column, num_models=5, epochs=20, batch_size=32
             )
 
         elif option == '4':
             # Preparar dados para o modelo de ataque
             print("Preparando dados para o modelo de ataque...")
-            X_attack = pd.concat([pd.DataFrame(X_train), pd.DataFrame(y_train)], axis=1)  # Convertendo para DataFrame
+
+            # Usar o modelo alvo e os modelos sombra para preparar os dados de treino e teste
             (X_train_attack, y_train_attack), (X_val_attack, y_val_attack) = prepare_attack_data(
-            np.column_stack((X_train, y_train)),  # Converte target_data para array numpy
-            shadow_dataset.values  # Converte shadow_data para array numpy
-)
+                target_model, shadow_models, X_train, X_test, shadow_train_data, shadow_test_data
+            )
 
             # Definir e treinar o modelo de ataque
             attack_model = define_attack_model(input_dim=X_train_attack.shape[1])
